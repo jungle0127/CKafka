@@ -29,7 +29,7 @@ int main(){
 	
 	/* Create Kafka client configuration place-holder */
 	conf = rd_kafka_conf_new();
-	
+	/*配置kafka各项参数*/
 	if(rd_kafka_conf_set(conf,"bootstrap.servers",brokers,errstr,sizeof(errstr)) != RD_KAFKA_CONF_OK){
 	fprintf(stderr,"%s\n",errstr);
 	return 1;
@@ -44,7 +44,7 @@ int main(){
 		return 1;
 	}
 	/*
-	*
+	* 实例化topic
 	*/
 	rkt = rd_kafka_topic_new(rk,topic,NULL);
 	if(!rkt){
@@ -56,13 +56,16 @@ int main(){
 	}
 //	buf = "message content";
 	int len = strlen(buf);
+	// 异步调用将消息发送到指定的topic
 	int result = rd_kafka_produce(
 		rkt,
 		RD_KAFKA_PARTITION_UA,
 		RD_KAFKA_MSG_F_COPY,
 		buf,len,
 		NULL,0,NULL);
+	// 阻塞等待消息发送完成
 	rd_kafka_poll(rk, 0);
+	// 等待完成producer请求完成
 	rd_kafka_flush(rk, 10*1000 /* wait for max 10 seconds */);
 	if(result > -1){
 		printf("\n send result: %d\n",result);
