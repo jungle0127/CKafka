@@ -53,7 +53,7 @@ int main(){
      * Temporary properties for Producer
      */ 
     char buf[512] = "producer message";    
-    const char *topic_producer = "demo_topic";
+    const char *topic_producer = "CSMP_REQ_BLS_as";
 
 
     /**
@@ -68,7 +68,7 @@ int main(){
     /**
      * Properties for consumer
      */ 
-    char *topic_consumer = "demo_topic";
+    char *topic_consumer = "CSMP_RESP_BLS_as";
     /////////////////////////////////////////////////////////
     // Producer configuration
     /////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ int main(){
     // loop for sending and receiving
     /////////////////////////////////////////////////////////
     struct timeval start,end;
-    for(int index = 0;index < 10;index++){
+    for(int index = 0;index < 100;index++){
         int len = strlen(buf);
         int result = rd_kafka_produce(
             rkt_producer,
@@ -137,6 +137,7 @@ int main(){
 
         rd_kafka_poll(rk_producer,0);
         rd_kafka_flush(rk_producer,10*1000);
+	printf("send finished\n");
         /*
         if(result > -1){		
 		    fprintf(stderr, "%% Enqueued message (%d bytes) "
@@ -147,13 +148,21 @@ int main(){
         */
         // send finished.
         rd_kafka_message_t *rkmessage;
-        rkmessage = rd_kafka_consumer_poll(rk_consumer,1000);
+	while(1){
+		rkmessage = rd_kafka_consumer_poll(rk_consumer,5*1000);
+		if(rkmessage){
+			break;
+		}
+		printf("Waiting for response message...\n");
+	}
         gettimeofday(&end,NULL);
         int timeuse =1000000 * ( end.tv_sec -start.tv_sec) + end.tv_usec -start.tv_usec;
+	printf("processed one sending and receiving\n");
         if(rkmessage){
             msg_consume(rkmessage,NULL);
             //log_time((char *)rkmessage->payload);
             log_time(timeuse);
+	    printf("%d",timeuse);
             rd_kafka_message_destroy(rkmessage);
         }
 
