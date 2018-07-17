@@ -5,6 +5,7 @@
 #include <error.h>
 #include <getopt.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include "src/rdkafka.h"
 
 static void log_time(char* data){
@@ -13,6 +14,14 @@ static void log_time(char* data){
         return;
     }
     fprintf(fp,"%s\n",data);
+    fclose(fp);
+}
+static void log_time(int val){
+    FILE *fp = fopen("data.log","a+");
+    if(fp == NULL){
+        return;
+    }
+    fprintf(fp,"%d\n",val);
     fclose(fp);
 }
 static void msg_consume (rd_kafka_message_t *rkmessage,
@@ -113,7 +122,7 @@ int main(){
     /////////////////////////////////////////////////////////
     // loop for sending and receiving
     /////////////////////////////////////////////////////////
-
+    struct timeval start,end;
     for(int index = 0;index < 10;index++){
         int len = strlen(buf);
         int result = rd_kafka_produce(
@@ -122,20 +131,28 @@ int main(){
             RD_KAFKA_MSG_F_COPY,
             buf,len,
             NULL,0,NULL);
+        
+        gettimeofday(&start,NULL);
+
         rd_kafka_poll(rk_producer,0);
         rd_kafka_flush(rk_producer,10*1000);
+        /*
         if(result > -1){		
 		    fprintf(stderr, "%% Enqueued message (%d bytes) "
                                 "for topic %s\n",
 			len, rd_kafka_topic_name(rkt_producer));
             log_time("Enqueued message\n");
 	    }
+        */
         // send finished.
         rd_kafka_message_t *rkmessage;
         rkmessage = rd_kafka_consumer_poll(rk_consumer,1000);
+        gettimeofday(&end,NULL);
+        int timeuse =1000000 * ( end.tv_sec -start.tv_sec) + end.tv_usec -start.tv_usec;
         if(rkmessage){
             msg_consume(rkmessage,NULL);
             log_time((char *)rkmessage->payload);
+            log_time(timeuse);
             rd_kafka_message_destroy(rkmessage);
         }
 
