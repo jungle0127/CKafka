@@ -74,10 +74,23 @@ int main(){
 	// TODO:
 	rd_kafka_topic_conf_set(topic_conf, "offset.store.method",
                                             "broker",errstr, sizeof(errstr));
+
+	rd_kafka_conf_set_default_topic_conf(conf, topic_conf);
+
 	// 创建consumer实例					    
 	rk = rd_kafka_new(RD_KAFKA_CONSUMER, conf,errstr, sizeof(errstr));
+
 	// 为consumer实例添加brokerlist
 	rd_kafka_brokers_add(rk, brokers);
+	
+	//重定向 rd_kafka_poll()队列到consumer_poll()队列
+  	rd_kafka_poll_set_consumer(rk);
+
+	//创建一个Topic+Partition的存储空间(list/vector)
+	topics = rd_kafka_topic_partition_list_new(1);
+	//把Topic+Partition加入list
+	rd_kafka_topic_partition_list_add(topics, topic, -1);
+
 	// 开启consumer订阅
 	rd_kafka_subscribe(rk, topics);
 	// 轮询消息或事件，并调用回调函数
