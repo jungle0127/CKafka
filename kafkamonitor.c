@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include "src/rdkafka.h"
 
-static void log(char* data){
-    FILE *fp = fopen("data.log","w+");
+static void log_time(char* data){
+    FILE *fp = fopen("data.log","a+");
     if(fp == NULL){
-        return 0;
+        return;
     }
-    fprintf(fp,data);
+    fprintf(fp,"%s\n",data);
     fclose(fp);
 }
 static void msg_consume (rd_kafka_message_t *rkmessage,
@@ -128,19 +128,16 @@ int main(){
 		    fprintf(stderr, "%% Enqueued message (%d bytes) "
                                 "for topic %s\n",
 			len, rd_kafka_topic_name(rkt_producer));
-            log("Enqueued message\n");
+            log_time("Enqueued message\n");
 	    }
         // send finished.
         rd_kafka_message_t *rkmessage;
         rkmessage = rd_kafka_consumer_poll(rk_consumer,1000);
         if(rkmessage){
             msg_consume(rkmessage,NULL);
-            log((char *)rkmessage->payload);
-            log("\n");
+            log_time((char *)rkmessage->payload);
             rd_kafka_message_destroy(rkmessage);
         }
 
-
-        
     }
 }
