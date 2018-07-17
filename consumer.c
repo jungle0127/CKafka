@@ -6,7 +6,7 @@
 #include <getopt.h>
  
 #include "src/rdkafka.h"
-
+static int run = 1;
 static rd_kafka_t *rk;
 static rd_kafka_topic_partition_list_t *topics;
 static void msg_consume (rd_kafka_message_t *rkmessage,
@@ -61,6 +61,7 @@ int main(){
 	rd_kafka_conf_t *conf;
 	rd_kafka_topic_conf_t *topic_conf;
 	rd_kafka_resp_err_t err;
+	const char *debug = NULL;
 	char errstr[512];
 	// 创建kafka配置
 	conf = rd_kafka_conf_new();
@@ -68,11 +69,11 @@ int main(){
 	topic_conf = rd_kafka_topic_conf_new();
 	// 配置kafka各项参数
 	// TODO:
-	rd_kafka_conf_set(conf, "debug", debug, errstr, sizeof(errstr);
+	rd_kafka_conf_set(conf, "group.id", "consumer.group", errstr, sizeof(errstr));
 	// 配置kafka topic各项参数
 	// TODO:
 	rd_kafka_topic_conf_set(topic_conf, "offset.store.method",
-                                            "broker",errstr, sizeof(errstr);
+                                            "broker",errstr, sizeof(errstr));
 	// 创建consumer实例					    
 	rk = rd_kafka_new(RD_KAFKA_CONSUMER, conf,errstr, sizeof(errstr));
 	// 为consumer实例添加brokerlist
@@ -81,10 +82,10 @@ int main(){
 	rd_kafka_subscribe(rk, topics);
 	// 轮询消息或事件，并调用回调函数
 	// TODO: 无限轮询
-	while(true){
+	while(1){
 		rd_kafka_message_t *rkmessage;
 		rkmessage = rd_kafka_consumer_poll(rk, 1000);
-		msg_consume(rkmessage);
+		msg_consume(rkmessage,NULL);
 	}
 
 }
