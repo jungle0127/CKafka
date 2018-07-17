@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include "src/rdkafka.h"
-
+/*
 static void log_time(char* data){
     FILE *fp = fopen("data.log","a+");
     if(fp == NULL){
@@ -16,6 +16,7 @@ static void log_time(char* data){
     fprintf(fp,"%s\n",data);
     fclose(fp);
 }
+*/
 static void log_time(int val){
     FILE *fp = fopen("data.log","a+");
     if(fp == NULL){
@@ -151,7 +152,7 @@ int main(){
         int timeuse =1000000 * ( end.tv_sec -start.tv_sec) + end.tv_usec -start.tv_usec;
         if(rkmessage){
             msg_consume(rkmessage,NULL);
-            log_time((char *)rkmessage->payload);
+            //log_time((char *)rkmessage->payload);
             log_time(timeuse);
             rd_kafka_message_destroy(rkmessage);
         }
