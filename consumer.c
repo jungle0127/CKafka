@@ -57,6 +57,7 @@ static void msg_consume (rd_kafka_message_t *rkmessage,
   
 }
 int main(){
+	char *topic = "demo_topic";
 	char *brokers = "192.168.17.199:9092";
 	rd_kafka_conf_t *conf;
 	rd_kafka_topic_conf_t *topic_conf;
@@ -98,7 +99,10 @@ int main(){
 	while(1){
 		rd_kafka_message_t *rkmessage;
 		rkmessage = rd_kafka_consumer_poll(rk, 1000);
-		msg_consume(rkmessage,NULL);
+		if(rkmessage){
+			msg_consume(rkmessage,NULL);
+			rd_kafka_message_destroy(rkmessage);
+		}
 	}
 
 }
