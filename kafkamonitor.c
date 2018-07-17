@@ -10,11 +10,11 @@
 static void msg_consume (rd_kafka_message_t *rkmessage,
        void *opaque) {
   if (rkmessage->key_len) {
-    printf("Key: %.*s\n",
+    printf("==Key: %.*s\n",
              (int)rkmessage->key_len, (char *)rkmessage->key);
   }
  
-  printf("%.*s\n",
+  printf("==%.*s\n",
            (int)rkmessage->len, (char *)rkmessage->payload);
   
 }
@@ -58,7 +58,7 @@ int main(){
     /* Create Kafka client configuration place-holer*/
     conf_producer = rd_kafka_conf_new();
     /* Configure parameters of Kafka*/
-    if(rd_kafka_conf_set(conf_producer,"bootstrap.servers",brokers,errstr,sizeof(errstr)) != RD_KAFAKA_CONF_OK){
+    if(rd_kafka_conf_set(conf_producer,"bootstrap.servers",brokers,errstr,sizeof(errstr)) != RD_KAFKA_CONF_OK){
         fprintf(stderr,"%s\n",errstr);
         return 1;
     }
@@ -91,7 +91,7 @@ int main(){
         "broker",errstr,sizeof(errstr));
     rd_kafka_conf_set_default_topic_conf(conf_consumer,topic_conf_consumer);
     /* Create Kafka instance for consumer*/
-    rk_consumer = rd_kafka_new(RD_KAFAKA_CONSUMER,conf_consumer,errstr,sizeof(errstr));
+    rk_consumer = rd_kafka_new(RD_KAFKA_CONSUMER,conf_consumer,errstr,sizeof(errstr));
     /* Add broker list for consumer instance*/
     rd_kafka_brokers_add(rk_consumer,brokers);
     /* redirect rd_kafka_poll() queue to consumer_poll() queue*/
@@ -119,7 +119,7 @@ int main(){
         if(result > -1){		
 		    fprintf(stderr, "%% Enqueued message (%d bytes) "
                                 "for topic %s\n",
-			len, rd_kafka_topic_name(rkt));
+			len, rd_kafka_topic_name(rkt_producer));
 	    }
         // send finished.
         rd_kafka_message_t *rkmessage;
